@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: wp-adminer
+  namespace: wordpress
 spec:
   replicas: 1
   selector:
@@ -24,6 +25,7 @@ metadata:
     tier: frontend
     env: dev
     app: wp-adminer
+  namespace: wordpress  
 spec:
   ports:
   - port: 8080
