@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wp-adminer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wp-adminer
+  template:
+    metadata:
+      labels:
+        app: wp-adminer
+    spec:
+      containers:
+      - name: wp-adminer
+        image: adminer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wp-adminer
+  labels:
+    tier: frontend
+    env: dev
+    app: wp-adminer
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+  selector:  
+    app: wp-adminer
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wp-app
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: wp-app
+  template:
+    metadata:
+      labels:
+        app: wp-app
+    spec:
+      containers:
+      - name: wp-app
+        image: wordpress
+        env:
+        - name: WORDPRESS_DB_USER
+          value: wpuser
+        - name: WORDPRESS_DB_PASSWORD
+          value: end321
+        - name: WORDPRESS_DB_NAME
+          value: wordpress
+        - name: WORDPRESS_DB_HOST
+          value: wp-db
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wp-app
+  labels:
+    tier: frontend
+    env: prod
+    customer: tuke
+spec: 
+  ports:
+  - port: 80
+    targetPort: 80
+  type: NodePort
+  selector:
+    app: wp-app
+---
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: wp-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels: 
+      app: wp-db
+  template:
+    metadata:
+      labels:
+        app: wp-db
+    spec:      
+      containers:
+      - env:
+        - name: MARIADB_ROOT_PASSWORD
+          value: top.secret
+        - name: MARIADB_DATABASE
+          value: wordpress
+        - name: MARIADB_USER
+          value: wpuser
+        - name: MARIADB_PASSWORD
+          value: end321
+        image: mariadb
+        name: wp-db    
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wp-db
+  labels:
+    tier: backend
+    env: prod
+    customer: tuke
+spec:
+  ports:
+  - port: 3306
+    targetPort: 3306
+  selector:  
+    app: wp-db
