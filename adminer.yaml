@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wp-adminer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wp-adminer
+  template:
+    metadata:
+      labels:
+        app: wp-adminer
+    spec:
+      containers:
+      - name: wp-adminer
+        image: adminer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wp-adminer
+  labels:
+    tier: frontend
+    env: dev
+    app: wp-adminer
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+  selector:  
+    app: wp-adminer
+  type: NodePort
